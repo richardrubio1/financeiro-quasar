@@ -2,7 +2,7 @@
   <q-layout view="lHh Lpr lFf">
    <q-header elevated class="bg-primary text-white">
   <q-toolbar>
-    <q-toolbar-title shrink class="cursor-pointer" @click="$router.push('/')">Controlled Finance</q-toolbar-title>
+    <!-- --><q-toolbar-title shrink class="cursor-pointer" @click="$router.push('/')">Início</q-toolbar-title>
     <!-- Cadastros -->
     <q-btn-dropdown label="Cadastros" flat dense>
       <q-list>

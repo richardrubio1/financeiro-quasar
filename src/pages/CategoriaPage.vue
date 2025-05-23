@@ -1,65 +1,143 @@
 <template>
     <q-page padding>
-        <q-card class="q-pa-md" flat bordered>
+        <q-card>
             <q-card-section>
-                <div class="text-h6">Cadastro de Categorias</div>
+                <q-table flat dense :rows="categorias" :columns="columns" row-key="id">
+                    <template v-slot:top>
+                        <div class="row items-center justify-between full-width">
+                            <div class="text-h6">Categorias Cadastradas</div>
+                            <q-btn color="primary" icon="add" label="Cadastrar" @click="abrirFormulario" />
+                        </div>
+                    </template>
+
+                    <template v-slot:body-cell-actions="props">
+                        <q-td align="center">
+                            <q-btn flat dense icon="edit" @click="editarCategoria(props.row)" />
+                            <q-btn flat dense icon="delete" color="negative" @click="deletarCategoria(props.row.id)" />
+                        </q-td>
+                    </template>
+                </q-table>
             </q-card-section>
-
-            <q-separator />
-
-            <q-form @submit.prevent="salvar">
-                <div class="q-gutter-md">
-                    <q-input v-model="form.nome" label="Nome da Categoria" filled />
-
-                    <q-select v-model="form.tipo_id" :options="tipos" option-label="name" option-value="id" label="Tipo"
-                        filled />
-
-                    <q-btn label="Salvar" type="submit" color="primary" />
-                </div>
-            </q-form>
         </q-card>
-        <q-table title="Categorias Cadastradas" :rows="categorias" :columns="columns" row-key="id" flat bordered
-            class="q-mt-lg" />
+
+        <!-- Formulário de Categoria -->
+        <q-dialog v-model="formAberto">
+            <q-card style="min-width: 400px">
+                <q-card-section>
+                    <div class="text-h6">{{ modoEdicao ? 'Editar Categoria' : 'Nova Categoria' }}</div>
+                    <q-input v-model="form.nome" label="Nome da Categoria" dense autofocus
+                        :rules="[val => !!val || 'Informe o nome']" class="q-mt-md" />
+                    <q-select v-model="form.tipo_id" :options="tipos" label="Tipo" option-label="nome" option-value="id"
+                        emit-value map-options class="q-mt-md" :rules="[val => !!val || 'Selecione o tipo']" />
+                </q-card-section>
+                <q-card-actions align="right">
+                    <q-btn flat label="Cancelar" @click="cancelarFormulario" />
+                    <q-btn flat label="Salvar" color="primary" @click="salvarCategoria" />
+                </q-card-actions>
+            </q-card>
+        </q-dialog>
     </q-page>
 </template>
 
-<script setup lang="ts">
+
+<script setup>
 import { ref, onMounted } from 'vue'
-import { axios } from 'axios'   // Importando axios do boot
-import type { QTableColumn } from 'quasar'
-const form = ref({ nome: '', tipo_id: null })
+import { api } from 'boot/axios'
+import { Notify, Dialog } from 'quasar'
+
+//const form = ref({ nome: '', tipo_id: null })
 const tipos = ref([])
 const categorias = ref([])
+const formAberto = ref(false)
+const modoEdicao = ref(false)
 
-const columns: QTableColumn[] = [
-  { name: 'id', label: '#', align: 'left', field: 'id' },
-  { name: 'nome', label: 'Nome', align: 'left', field: 'nome' },
-  {
-    name: 'tipo',
-    label: 'Tipo',
-    align: 'left',
-    field: 'tipo_id'
-   /* format: (val: any, row: any) => {
-  console.log('row recebido:', row)
-  return row.tipo && row.tipo.name ? row.tipo.name : ''
-}*/
-  },
-  { name: 'actions', label: 'Ações', align: 'center', field: 'actions' }
+const form = ref({ nome: '', tipo_id: null })
+
+const columns = [
+    // { name: 'id', label: '#', align: 'left', field: 'id' },
+    { name: 'nome', label: 'Nome', align: 'left', field: 'nome' },
+    {
+        name: 'tipo',
+        label: 'Tipo',
+        align: 'left',
+        field: row => {
+            //console.log('Linha da tabela:', row)
+            return row.tipo?.nome || ''
+        }
+    },
+    { name: 'actions', label: 'Ações', align: 'center', field: 'actions' }
 ]
+async function abrirFormulario() {
+    form.value = { nome: '', tipo_id: null }        // limpa o formulário
+    modoEdicao.value = false         // desativa modo de edição
+    formAberto.value = true          // abre o dialog
+}
+async function cancelarFormulario() {
+    form.value = { nome: '', tipo_id: null } // limpa o formulário
+    formAberto.value = false         // fecha o dialog
+    modoEdicao.value = false         // desativa modo de edição
+}
+
 async function carregarTipos() {
-    const { data } = await axios.get('/tipos')
+    const { data } = await api.get('/tipos')
     tipos.value = data
+    console.log('tipos recebidos:', tipos.value)
 }
 
 async function carregarCategorias() {
-    const { data } = await axios.get('/categorias?_preload=tipo')
+    const { data } = await api.get('/categorias?_preload=tipo')
     categorias.value = data
+    //sconsole.log('categorias recebidas:', categorias.value)
 }
 
-async function salvar() {
-    await axios.post('/categorias', form.value)
-    form.value = { nome: '', tipo_id: null }
-    await carregarCategorias()
+async function salvarCategoria() {
+    try {
+        console.log('Enviando categoria:', form.value)
+        await api.post('/categorias', form.value)
+        formAberto.value = false // fecha o dialog
+        await carregarCategorias()
+    } catch (erro) {
+        console.error('Erro ao salvar categoria:', erro)
+    }
+
+}
+
+async function deletarCategoria(id) {
+    Dialog.create({
+        title: 'Confirmação',
+        message: 'Tem certeza que deseja excluir esta categoria?',
+        persistent: true,
+        ok: {
+            label: 'Sim',
+            color: 'negative'
+        },
+        cancel: {
+            label: 'Cancelar',
+            flat: true
+        }
+    }).onOk(async () => {
+        try {
+            await api.delete(`/categorias/${id}`)
+
+            Notify.create({
+                type: 'positive',
+                message: 'Categoria excluída com sucesso!',
+                position: 'bottom-right',
+                timeout: 3000,
+            })
+
+            await carregarCategorias()
+        } catch (erro) {
+            console.error('Erro ao excluir categoria:', erro)
+
+            Notify.create({
+                type: 'negative',
+                message: 'Erro ao excluir categoria. Ela pode estar vinculada a lançamentos.',
+                position: 'bottom-right',
+                timeout: 5000,
+            })
+        }
+    })
 }
 
 onMounted(() => {
