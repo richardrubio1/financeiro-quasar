@@ -27,7 +27,7 @@
                     <div class="text-h6">{{ modoEdicao ? 'Editar Categoria' : 'Nova Categoria' }}</div>
                     <q-input v-model="form.nome" label="Nome da Categoria" dense autofocus
                         :rules="[val => !!val || 'Informe o nome']" class="q-mt-md" />
-                    <q-select v-model="form.tipo_id" :options="tipos" label="Tipo" option-label="nome" option-value="id"
+                    <q-select v-model="form.tipoId" :options="tipos" label="Tipo" option-label="nome" option-value="id"
                         emit-value map-options class="q-mt-md" :rules="[val => !!val || 'Selecione o tipo']" />
                 </q-card-section>
                 <q-card-actions align="right">
@@ -51,7 +51,7 @@ const categorias = ref([])
 const formAberto = ref(false)
 const modoEdicao = ref(false)
 
-const form = ref({ nome: '', tipo_id: null })
+const form = ref({ nome: '', tipoId: null })
 
 const columns = [
     // { name: 'id', label: '#', align: 'left', field: 'id' },
@@ -68,12 +68,12 @@ const columns = [
     { name: 'actions', label: 'Ações', align: 'center', field: 'actions' }
 ]
 async function abrirFormulario() {
-    form.value = { nome: '', tipo_id: null }        // limpa o formulário
+    form.value = { nome: '', tipoId: null }        // limpa o formulário
     modoEdicao.value = false         // desativa modo de edição
     formAberto.value = true          // abre o dialog
 }
 async function cancelarFormulario() {
-    form.value = { nome: '', tipo_id: null } // limpa o formulário
+    form.value = { nome: '', tipoId: null } // limpa o formulário
     formAberto.value = false         // fecha o dialog
     modoEdicao.value = false         // desativa modo de edição
 }
@@ -87,11 +87,12 @@ async function carregarTipos() {
 async function carregarCategorias() {
     const { data } = await api.get('/categorias?_preload=tipo')
     categorias.value = data
-    //sconsole.log('categorias recebidas:', categorias.value)
+    console.log('categorias recebidas:', categorias.value)
 }
 
 async function salvarCategoria() {
     try {
+
         console.log('Enviando categoria:', form.value)
         await api.post('/categorias', form.value)
         formAberto.value = false // fecha o dialog
