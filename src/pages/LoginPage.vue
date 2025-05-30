@@ -111,7 +111,7 @@ const registerForm = ref({
 })
 
 const emailRule = val => {
-  const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+  const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[^\s@]{2,}$/
   return emailPattern.test(val) || 'Email inválido'
 }
 
@@ -126,10 +126,11 @@ const handleLogin = async () => {
       type: 'positive',
       message: 'Login realizado com sucesso!'
     })
-  } catch (error) {
+  } catch (err) {
+    console.error('Login error:', err.message)
     $q.notify({
       type: 'negative',
-      message: 'Erro ao fazer login. Verifique suas credenciais.'
+      message: `Erro ao fazer login: ${err.message}`
     })
   }
 }
@@ -141,10 +142,11 @@ const handleRegister = async () => {
       type: 'positive',
       message: 'Registro realizado com sucesso!'
     })
-  } catch (error) {
+  } catch (err) {
+    console.error('Registration error:', err.message)
     $q.notify({
       type: 'negative',
-      message: 'Erro ao registrar. Tente novamente.'
+      message: `Erro ao registrar: ${err.message}`
     })
   }
 }

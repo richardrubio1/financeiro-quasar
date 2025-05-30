@@ -131,10 +131,11 @@ const fetchGroups = async () => {
   try {
     const { data } = await api.get('/groups')
     groups.value = data
-  } catch (error) {
+  } catch (err) {
+    console.error('Error fetching groups:', err.message)
     $q.notify({
       type: 'negative',
-      message: 'Erro ao carregar grupos'
+      message: `Erro ao carregar grupos: ${err.message}`
     })
   }
 }
@@ -168,10 +169,11 @@ const saveGroup = async () => {
       type: 'positive',
       message: 'Grupo salvo com sucesso!'
     })
-  } catch (error) {
+  } catch (err) {
+    console.error('Error saving group:', err.message)
     $q.notify({
       type: 'negative',
-      message: 'Erro ao salvar grupo'
+      message: `Erro ao salvar grupo: ${err.message}`
     })
   }
 }
@@ -186,10 +188,11 @@ const sendInvite = async () => {
       type: 'positive',
       message: 'Convite enviado com sucesso!'
     })
-  } catch (error) {
+  } catch (err) {
+    console.error('Error sending invite:', err.message)
     $q.notify({
       type: 'negative',
-      message: 'Erro ao enviar convite'
+      message: `Erro ao enviar convite: ${err.message}`
     })
   }
 }
@@ -211,10 +214,11 @@ const confirmDelete = (group) => {
         type: 'positive',
         message: 'Grupo excluído com sucesso!'
       })
-    } catch (error) {
+    } catch (err) {
+      console.error('Error deleting group:', err.message)
       $q.notify({
         type: 'negative',
-        message: 'Erro ao excluir grupo'
+        message: `Erro ao excluir grupo: ${err.message}`
       })
     }
   })

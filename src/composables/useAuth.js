@@ -19,7 +19,8 @@ export function useAuth() {
       localStorage.setItem('token', token.value)
       api.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
       router.push('/')
-    } catch (error) {
+    } catch (err) {
+      console.error('Login error:', err.message)
       throw new Error('Credenciais inválidas')
     }
   }
@@ -40,7 +41,8 @@ export function useAuth() {
       localStorage.setItem('token', token.value)
       api.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
       router.push('/')
-    } catch (error) {
+    } catch (err) {
+      console.error('Registration error:', err.message)
       throw new Error('Erro ao registrar usuário')
     }
   }
