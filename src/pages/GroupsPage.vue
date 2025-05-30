@@ -30,7 +30,7 @@
                         <q-item clickable v-close-popup @click="editGroup(group)">
                           <q-item-section>Editar</q-item-section>
                         </q-item>
-                        <q-item clickable v-close-popup @click="showInviteDialog(group)">
+                        <q-item clickable v-close-popup @click="openInviteDialog(group)">
                           <q-item-section>Convidar</q-item-section>
                         </q-item>
                         <q-item clickable v-close-popup @click="confirmDelete(group)">
@@ -110,7 +110,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { api } from 'boot/axios'
 import { useQuasar } from 'quasar'
 
@@ -149,7 +149,7 @@ const editGroup = (group) => {
   showCreateDialog.value = true
 }
 
-const showInviteDialog = (group) => {
+const openInviteDialog = (group) => {
   selectedGroup.value = group
   inviteEmail.value = ''
   showInviteDialog.value = true
